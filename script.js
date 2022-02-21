@@ -76,48 +76,47 @@ const printAmounts = (obj) => {
     })
 }
 
+//вспомогательня функция для добавления незначащих нулей в двузначные числа
 const addZero = (num) => (num >= 10) ? num : '0' + num;
 
+// вспом. функция для случайного процента
+const randomPercent = (max) => 1 + (Math.floor(Math.random() * max + 1)) / 100;
+
+// вспом.функция для вычисления разности дат в днях
 const diffDate = (date1,date2) => Math.floor((date1 - date2) / (1000 * 60 * 60 * 24)); // получаем разность дат
 
-// const addDays = (days) => {
-//     const date = new Date();
-//     date.setDate(today.getDate() + days);
-   
-//     return date;
-// }
-
+// вспом. функция изменения даты, добавляет заданное количество дней к дате
 Date.prototype.addDays = function (days) {
     const date = new Date(this.valueOf());
     date.setDate(date.getDate() + days);
     return date;
 };
 
-const randomPercent = (max) => 1 + (Math.floor(Math.random() * max + 1)) / 100;
-
-
-
-
 
 //первичная отрисовка селектора, 
 (() => {
+    //отрисовываем селектор с валютами
     currencies.forEach(item => {
         let elem = document.createElement("option");
         elem.value = elem.textContent =  item;
         currencySelector.append(elem);
     })
+    // сохраняем в currentCurrency значение селектора
     currentCurrency = currencySelector.value;
-    amountElem.value = amountElem.textContent =  USDrate[currentCurrency];
+
+    // по умолчанию количество валюты равно 1
+    amountElem.value = amountElem.textContent = 1;
+
+    // прописываем в datepicker текущую дату
     calendarElem.value = `${today.getFullYear()}-${addZero(today.getMonth()+1)}-${addZero(today.getDate())}`;
 
-    populateCurrencyList(currentCurrency);
+    // исключаем из лейблов выбранную в селекторе валюту
+    populateCurrencyList(currentCurrency);    
 
-    
-    
-    
-
+    // в массив объектов с историей валют за 14 дней нулевым значением прописываем эталонные курсы из объекта USDrate
     pastUSDrates[0] = Object.assign(USDrate);    
 
+    // заполняем pastUSDrates случайными значениями курсов
     for ( let i = 1; i < 15; i++) {
         pastUSDrates[i] = {
             CNY: (USDrate.CNY * randomPercent(10)),
@@ -128,12 +127,13 @@ const randomPercent = (max) => 1 + (Math.floor(Math.random() * max + 1)) / 100;
         }    
     }
 
+    // показываем текущие курсы
     printAmounts(calcAmounts(amountElem.value));
-    console.log(today.addDays(60));
 })();
 
 currencySelector.addEventListener('change', (e) => {
     e.preventDefault(); 
+    // после выбора другой валюты перерисовываем список валют в лейблах и пересчитываем значения
     currentCurrency = e.target.value;
     populateCurrencyList(currentCurrency);
     printAmounts(calcAmounts(amountElem.value));
@@ -141,22 +141,26 @@ currencySelector.addEventListener('change', (e) => {
 
 amountElem.addEventListener('input',(e) => {
     e.preventDefault();
-    // cx
+    // после изменения количества валюты конвертируем полученное значение, значения из поля берем по модулю
     amountElem.value = Math.abs(amountElem.value);
     printAmounts(calcAmounts(amountElem.value));
 })
 
 calendarElem.addEventListener('change',(e) => {
     e.preventDefault();
-    
+    // после изменения даты высчитываем разность между выбранной датой и текущей
     const date = new Date(e.target.value);
     diff = diffDate(today, date);
 
+    // если разность меньше нуля, т.е. выбрана дата из будущего, то предупреждаем пользователя, что курс из будущего показать нельзя
+    // и в календарь записываем текущую дату
     if (diff < 0) {
         diff = 0;
-        alert('Мы не можем курс из будущего, т.к. мы их не знаем. Вместо этого покажем курс на сегодня');
+        alert('Мы не можем показать курсы валют из будущего, т.к. мы их не знаем. Вместо этого покажем курсы на сегодня');
         calendarElem.value = `${today.getFullYear()}-${addZero(today.getMonth()+1)}-${addZero(today.getDate())}`;
     } else {
+        // если разность больше 14, т.е. выбранный день был раньше на 15 дней и более, то также предупреждаем, 
+        // что показать курс на эту дату невозможно и показываем курс на крайнюю возможную дату.
         if (diff > 14) {
             diff = 14;
             const lastDay = today.addDays(diff);
