@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+    
+</head>
+<body>
+    <div class="container">
+        <label for="currency-select">Выберите валюту</label>
+        <div class="select" id="currency">
+            <select id="currency-select"></select>
+        </div>
+        <div class="number-field" >
+            <label class="number-field__label" for="amount">Введите количество</label>
+            <input class="number-field__input" 
+                    type="text" name="amount" id="amount" 
+                    inputmode="numeric" placeholder="Введите количество" value="1">
+            <hr>
+            <div id="currency-list"></div>
+        </div>
+
+        <div class="calendar" id="calendar">
+            <label for="calendar-input">Показать курс на дату: </label>
+
+            <input type="date" id="calendar-input" name="trip-start">
+        </div>
+        
+    </div>
+
+      <script src="script.js"> </script>
+</body>
+</html>
